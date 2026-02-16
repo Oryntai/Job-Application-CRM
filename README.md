@@ -1,2 +1,3 @@
-# Job-Application-CRM
-Job Application CRM — Django-based personal tracker for managing job applications, follow-ups, and pipeline analytics with background reminders and conversion insights.
+Job Application CRM is a full-stack Django application designed to help individuals manage and optimize their job search process. It provides structured tracking of applications, companies, contacts, interview stages, and follow-ups, combined with analytics on conversion rates and time-in-stage metrics.
+
+The system includes a Kanban-style pipeline, scheduled reminders via Celery, email notifications, and a dashboard with funnel statistics. Built with Django, Django REST Framework, PostgreSQL, Redis, and HTMX, the project follows a service-layer architecture, supports API access with JWT authentication, and is containerized with Docker for local development and deployment.
