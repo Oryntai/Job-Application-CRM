@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load app_extras %}
+{% block title %}Kanban{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Kanban</h1>
+<div class="grid lg:grid-cols-4 gap-4">
+  {% for status,label in statuses %}
+    <section class="bg-slate-200 rounded p-3">
+      <h2 class="font-semibold mb-3">{{ label }}</h2>
+      <div class="space-y-3">
+        {% for app in grouped|get_item:status %}
+          <article id="application-{{ app.id }}" class="bg-white rounded shadow p-3">
+            <div class="font-medium text-sm"><a href="{% url 'applications:detail' app.id %}">{{ app.role_title }}</a></div>
+            <div class="text-xs text-slate-600 mb-2">{{ app.company.name }}</div>
+            <form method="post" action="{% url 'applications:move-status' app.id %}" class="space-y-1">
+              {% csrf_token %}
+              <input type="hidden" name="note" value="Moved from Kanban">
+              <select name="to_status" class="w-full border rounded px-2 py-1 text-xs">
+                {% for code,label2 in status_choices %}
+                  <option value="{{ code }}">{{ label2 }}</option>
+                {% endfor %}
+              </select>
+              <button class="w-full rounded bg-slate-900 text-white text-xs py-1">Move</button>
+            </form>
+          </article>
+        {% empty %}
+          <div class="text-xs text-slate-600">No cards</div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+</div>
+{% endblock %}

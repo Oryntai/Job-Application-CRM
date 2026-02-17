@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Applications{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+  <h1 class="text-2xl font-semibold">Applications</h1>
+  <a href="{% url 'applications:create' %}" class="px-3 py-2 rounded bg-slate-900 text-white">Quick add</a>
+</div>
+<form id="filters" method="get" class="bg-white rounded shadow p-4 mb-4 grid md:grid-cols-6 gap-2"
+      hx-get="{% url 'applications:list' %}" hx-target="#applications-table" hx-push-url="true">
+  <input class="border rounded px-2 py-1 md:col-span-2" type="text" name="q" value="{{ request.GET.q }}" placeholder="Search role/company/notes">
+  <select class="border rounded px-2 py-1" name="status">
+    <option value="">All statuses</option>
+    {% for code,label in status_choices %}
+      <option value="{{ code }}" {% if request.GET.status == code %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select class="border rounded px-2 py-1" name="source">
+    <option value="">All sources</option>
+    {% for code,label in source_choices %}
+      <option value="{{ code }}" {% if request.GET.source == code %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select class="border rounded px-2 py-1" name="location_type">
+    <option value="">Location</option>
+    {% for code,label in location_choices %}
+      <option value="{{ code }}" {% if request.GET.location_type == code %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select class="border rounded px-2 py-1" name="ordering">
+    <option value="-applied_date">Applied date (desc)</option>
+    <option value="applied_date" {% if request.GET.ordering == 'applied_date' %}selected{% endif %}>Applied date (asc)</option>
+    <option value="next_action_at" {% if request.GET.ordering == 'next_action_at' %}selected{% endif %}>Next action</option>
+    <option value="-priority" {% if request.GET.ordering == '-priority' %}selected{% endif %}>Priority</option>
+  </select>
+</form>
+<div id="applications-table">
+  {% include 'applications/_application_list.html' %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+<ul class="space-y-2">
+  {% for reminder in reminders %}
+    <li class="border rounded p-2 bg-white">
+      <div class="font-medium text-sm">{{ reminder.application.role_title }} @ {{ reminder.application.company.name }}</div>
+      <div class="text-xs text-slate-600">{{ reminder.remind_at }} | {{ reminder.channel }} | {{ reminder.status }}</div>
+      <div class="text-sm">{{ reminder.message }}</div>
+      {% if reminder.status == 'PENDING' %}
+      <form method="post" action="{% url 'reminders:cancel' reminder.id %}" class="mt-2">{% csrf_token %}
+        <button class="px-2 py-1 border rounded text-xs">Cancel</button>
+      </form>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li class="text-slate-600">No reminders.</li>
+  {% endfor %}
+</ul>

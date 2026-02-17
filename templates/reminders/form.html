@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Create reminder{% endblock %}
+{% block content %}
+<div class="max-w-2xl bg-white rounded shadow p-6">
+  <h1 class="text-xl font-semibold mb-4">Reminder for {{ application.role_title }}</h1>
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="px-4 py-2 bg-slate-900 text-white rounded">Save reminder</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Dashboard</h1>
+<div class="grid md:grid-cols-4 gap-4 mb-4">
+  <div class="bg-white rounded shadow p-4"><div class="text-sm text-slate-600">Total applications</div><div class="text-2xl font-semibold">{{ totals.total }}</div></div>
+  <div class="bg-white rounded shadow p-4"><div class="text-sm text-slate-600">Offers</div><div class="text-2xl font-semibold">{{ totals.offers }}</div></div>
+  <div class="bg-white rounded shadow p-4"><div class="text-sm text-slate-600">Due reminders</div><div class="text-2xl font-semibold">{{ due_today }}</div></div>
+  <div class="bg-white rounded shadow p-4"><div class="text-sm text-slate-600">Overdue</div><div class="text-2xl font-semibold">{{ overdue }}</div></div>
+</div>
+<div class="grid lg:grid-cols-2 gap-4">
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Funnel</h2>
+    <canvas id="funnelChart" height="120"></canvas>
+  </section>
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Sources</h2>
+    <canvas id="sourceChart" height="120"></canvas>
+  </section>
+</div>
+<div class="grid lg:grid-cols-2 gap-4 mt-4">
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Recent status changes</h2>
+    <ul class="space-y-2 text-sm">
+      {% for item in latest_changes %}
+        <li>{{ item.changed_at }}: <a class="text-blue-700" href="{% url 'applications:detail' item.application.id %}">{{ item.application.role_title }}</a> {{ item.from_status }} -> {{ item.to_status }}</li>
+      {% empty %}<li class="text-slate-600">No changes yet.</li>{% endfor %}
+    </ul>
+  </section>
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Time in stage (hours)</h2>
+    <ul class="space-y-1 text-sm">
+      {% for stage,stats in time_in_stage.items %}
+        <li>{{ stage }}: avg={{ stats.avg_hours }}, median={{ stats.median_hours }}, n={{ stats.samples }}</li>
+      {% empty %}<li class="text-slate-600">Insufficient data.</li>{% endfor %}
+    </ul>
+  </section>
+</div>
+{{ funnel.stages|json_script:"funnel-data" }}
+{{ source_stats|json_script:"source-data" }}
+<script>
+  const funnelData = JSON.parse(document.getElementById('funnel-data').textContent);
+  const sourceData = JSON.parse(document.getElementById('source-data').textContent);
+
+  new Chart(document.getElementById('funnelChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(funnelData),
+      datasets: [{ label: 'Reached', data: Object.values(funnelData), backgroundColor: '#0f172a' }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
+
+  new Chart(document.getElementById('sourceChart'), {
+    type: 'pie',
+    data: {
+      labels: sourceData.map(i => i.source),
+      datasets: [{ data: sourceData.map(i => i.total), backgroundColor: ['#0f172a', '#334155', '#64748b', '#94a3b8', '#cbd5e1'] }]
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ object.name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex justify-between items-center">
+  <h1 class="text-2xl font-semibold">{{ object.name }}</h1>
+  <a href="{% url 'companies:edit' object.id %}" class="px-3 py-2 rounded bg-slate-900 text-white">Edit</a>
+</div>
+<div class="grid lg:grid-cols-2 gap-4">
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Details</h2>
+    <p><strong>Website:</strong> <a class="text-blue-600" href="{{ object.website }}">{{ object.website }}</a></p>
+    <p class="mt-2 whitespace-pre-line">{{ object.notes|default:'-' }}</p>
+  </section>
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Contacts</h2>
+    <ul class="space-y-2">
+      {% for contact in object.contacts.all %}
+      <li class="border rounded p-2">
+        <div class="font-medium">{{ contact.name }}</div>
+        <div class="text-sm text-slate-600">{{ contact.title }} | {{ contact.email }} | {{ contact.phone }}</div>
+      </li>
+      {% empty %}
+      <li class="text-slate-600">No contacts.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+<section class="bg-white rounded shadow p-4 mt-4">
+  <h2 class="font-semibold mb-2">Applications</h2>
+  <ul class="space-y-2">
+    {% for app in object.applications.all %}
+      <li><a class="text-blue-600" href="{% url 'applications:detail' app.id %}">{{ app.role_title }}</a> ({{ app.status }})</li>
+    {% empty %}
+      <li class="text-slate-600">No applications.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Companies{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+  <h1 class="text-2xl font-semibold">Companies</h1>
+  <a href="{% url 'companies:create' %}" class="px-3 py-2 rounded bg-slate-900 text-white">New company</a>
+</div>
+<form method="get" class="mb-4">
+  <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search companies" class="w-full rounded border px-3 py-2" />
+</form>
+<div class="grid md:grid-cols-2 gap-4">
+  {% for company in companies %}
+    <a href="{% url 'companies:detail' company.id %}" class="block bg-white rounded shadow p-4 hover:shadow-md">
+      <h2 class="font-semibold">{{ company.name }}</h2>
+      <p class="text-sm text-slate-600">{{ company.website }}</p>
+      <p class="text-sm text-slate-600 mt-2">Jobs: {{ company.jobs_count }}</p>
+    </a>
+  {% empty %}
+    <div class="text-slate-600">No companies yet.</div>
+  {% endfor %}
+</div>
+{% endblock %}

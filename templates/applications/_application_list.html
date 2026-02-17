@@ -1,0 +1,7 @@
+<div class="space-y-3">
+  {% for application in applications %}
+    {% include 'applications/_application_card.html' with application=application %}
+  {% empty %}
+    <div class="text-slate-600">No applications found.</div>
+  {% endfor %}
+</div>

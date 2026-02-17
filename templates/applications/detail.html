@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}{{ object.role_title }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex justify-between items-center">
+  <h1 class="text-2xl font-semibold">{{ object.role_title }}</h1>
+  <div class="flex gap-2">
+    <a href="{% url 'applications:edit' object.id %}" class="px-3 py-2 rounded bg-slate-900 text-white">Edit</a>
+    <a href="{% url 'pipeline:event-create' object.id %}" class="px-3 py-2 rounded bg-slate-700 text-white">Add event</a>
+    <a href="{% url 'reminders:create' object.id %}" class="px-3 py-2 rounded bg-slate-700 text-white">Add reminder</a>
+  </div>
+</div>
+<div class="grid lg:grid-cols-3 gap-4">
+  <section class="lg:col-span-2 bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-3">Overview</h2>
+    <div class="grid md:grid-cols-2 gap-3 text-sm">
+      <div><strong>Company:</strong> <a class="text-blue-700" href="{% url 'companies:detail' object.company.id %}">{{ object.company.name }}</a></div>
+      <div><strong>Status:</strong> {{ object.get_status_display }}</div>
+      <div><strong>Priority:</strong> {{ object.get_priority_display }}</div>
+      <div><strong>Source:</strong> {{ object.get_source_display }}</div>
+      <div><strong>Location:</strong> {{ object.get_location_type_display }} {{ object.location_text }}</div>
+      <div><strong>Salary:</strong> {{ object.salary_min }} - {{ object.salary_max }} {{ object.currency }}</div>
+      <div><strong>Applied:</strong> {{ object.applied_date }}</div>
+      <div><strong>Next action:</strong> {{ object.next_action_at|default:'-' }} {{ object.next_action_text }}</div>
+    </div>
+    <div class="mt-4 whitespace-pre-line">{{ object.notes|default:'-' }}</div>
+  </section>
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Move status</h2>
+    <form method="post" action="{% url 'applications:move-status' object.id %}" class="space-y-2">
+      {% csrf_token %}
+      <select class="w-full border rounded px-2 py-1" name="to_status">
+        {% for code,label in status_choices %}
+          <option value="{{ code }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+      <input class="w-full border rounded px-2 py-1" type="text" name="note" placeholder="Note">
+      <button class="w-full px-3 py-2 rounded bg-slate-900 text-white">Change</button>
+    </form>
+  </section>
+</div>
+<div class="grid lg:grid-cols-3 gap-4 mt-4">
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Timeline events</h2>
+    <ul class="space-y-2 text-sm">
+      {% for event in object.events.all %}
+        <li class="border rounded p-2">
+          <div class="font-medium">{{ event.event_type.label }}</div>
+          <div class="text-slate-600">{{ event.scheduled_at }} | {{ event.outcome|default:'-' }}</div>
+          <div>{{ event.notes }}</div>
+        </li>
+      {% empty %}<li class="text-slate-600">No events.</li>{% endfor %}
+    </ul>
+  </section>
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Reminders</h2>
+    {% include 'reminders/_reminders_list.html' with reminders=object.reminders.all %}
+  </section>
+  <section class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Status history</h2>
+    <ul class="space-y-2 text-sm">
+      {% for item in object.status_history.all %}
+        <li class="border rounded p-2">
+          {{ item.changed_at }}: {{ item.from_status|default:'-' }} -> {{ item.to_status }}
+          {% if item.note %}<div>{{ item.note }}</div>{% endif %}
+        </li>
+      {% empty %}<li class="text-slate-600">No status changes yet.</li>{% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

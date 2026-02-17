@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Job Application CRM{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen">
+  <header class="bg-slate-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="{% url 'analytics:dashboard' %}" class="font-semibold tracking-wide">Job Application CRM</a>
+      <nav class="flex gap-4 text-sm">
+        {% if user.is_authenticated %}
+          <a href="{% url 'analytics:dashboard' %}" class="hover:underline">Dashboard</a>
+          <a href="{% url 'applications:list' %}" class="hover:underline">Applications</a>
+          <a href="{% url 'applications:kanban' %}" class="hover:underline">Kanban</a>
+          <a href="{% url 'companies:list' %}" class="hover:underline">Companies</a>
+          <a href="{% url 'reminders:list' %}" class="hover:underline">Reminders</a>
+          <a href="{% url 'accounts:profile' %}" class="hover:underline">Profile</a>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="hover:underline">Logout</button></form>
+        {% else %}
+          <a href="{% url 'login' %}" class="hover:underline">Login</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  <main class="max-w-7xl mx-auto px-4 py-6">
+    {% if messages %}
+      <div class="space-y-2 mb-4">
+        {% for message in messages %}
+          <div class="rounded px-3 py-2 bg-slate-200 text-sm">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
