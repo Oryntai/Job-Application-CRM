@@ -7,12 +7,14 @@ from applications.api import JobApplicationViewSet, TagViewSet
 from companies.api import CompanyViewSet, ContactViewSet
 
 from .views import (
+    ab_outcomes_analytics_view,
     ApplicationEventDetailAPIView,
     ApplicationEventListCreateAPIView,
     ApplicationReminderDetailAPIView,
     ApplicationReminderListCreateAPIView,
     funnel_analytics_view,
     time_in_stage_analytics_view,
+    weekly_goal_analytics_view,
 )
 
 router = DefaultRouter()
@@ -48,4 +50,6 @@ urlpatterns = [
     ),
     path("analytics/funnel", funnel_analytics_view, name="analytics-funnel"),
     path("analytics/time-in-stage", time_in_stage_analytics_view, name="analytics-time-in-stage"),
+    path("analytics/weekly-goal", weekly_goal_analytics_view, name="analytics-weekly-goal"),
+    path("analytics/ab-outcomes", ab_outcomes_analytics_view, name="analytics-ab-outcomes"),
 ]

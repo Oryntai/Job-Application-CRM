@@ -8,7 +8,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from analytics.selectors import get_funnel_stats, get_time_in_stage
+from analytics.models import WeeklyGoal
+from analytics.selectors import (
+    get_ab_outcomes,
+    get_funnel_stats,
+    get_goal_streak,
+    get_time_in_stage,
+    get_weekly_goal_progress,
+)
 from applications.models import JobApplication
 from pipeline.api import ApplicationEventSerializer
 from pipeline.models import ApplicationEvent
@@ -110,4 +117,46 @@ def funnel_analytics_view(request):
 @permission_classes([IsAuthenticated])
 def time_in_stage_analytics_view(request):
     payload = get_time_in_stage(request.user)
+    return Response(payload)
+
+
+@extend_schema(responses=OpenApiTypes.OBJECT)
+@api_view(["GET", "PUT"])
+@permission_classes([IsAuthenticated])
+def weekly_goal_analytics_view(request):
+    if request.method == "PUT":
+        week_start = request.data.get("week_start")
+        parsed_week_start = date.fromisoformat(week_start) if week_start else None
+        progress = get_weekly_goal_progress(request.user, parsed_week_start)
+        goal = WeeklyGoal.objects.get(owner=request.user, week_start=progress["week_start"])
+        goal.target_applications = int(
+            request.data.get("target_applications", goal.target_applications)
+        )
+        goal.target_followups = int(request.data.get("target_followups", goal.target_followups))
+        goal.target_interviews = int(request.data.get("target_interviews", goal.target_interviews))
+        goal.save(
+            update_fields=[
+                "target_applications",
+                "target_followups",
+                "target_interviews",
+                "updated_at",
+            ]
+        )
+
+    week_start = request.GET.get("week_start")
+    parsed_week_start = date.fromisoformat(week_start) if week_start else None
+    payload = get_weekly_goal_progress(request.user, parsed_week_start)
+    payload["streak_weeks"] = get_goal_streak(request.user)
+    return Response(payload)
+
+
+@extend_schema(responses=OpenApiTypes.OBJECT)
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def ab_outcomes_analytics_view(request):
+    date_from = request.GET.get("from")
+    date_to = request.GET.get("to")
+    parsed_from = date.fromisoformat(date_from) if date_from else None
+    parsed_to = date.fromisoformat(date_to) if date_to else None
+    payload = get_ab_outcomes(request.user, (parsed_from, parsed_to))
     return Response(payload)

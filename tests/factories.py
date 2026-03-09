@@ -5,10 +5,12 @@ from django.utils import timezone
 from applications.models import (
     ApplicationStatus,
     JobApplication,
+    OutreachVariant,
     Priority,
     Source,
     Tag,
 )
+from analytics.models import WeeklyGoal
 from companies.models import Company, Contact
 from pipeline.models import ApplicationEvent, EventCode, EventType
 from reminders.models import Reminder, ReminderChannel, ReminderStatus
@@ -60,6 +62,7 @@ class JobApplicationFactory(factory.django.DjangoModelFactory):
     source = Source.LINKEDIN
     status = ApplicationStatus.DRAFT
     priority = Priority.MED
+    outreach_variant = OutreachVariant.A
     applied_date = factory.LazyFunction(timezone.localdate)
 
 
@@ -90,3 +93,14 @@ class ReminderFactory(factory.django.DjangoModelFactory):
     channel = ReminderChannel.EMAIL
     message = "Follow up"
     status = ReminderStatus.PENDING
+
+
+class WeeklyGoalFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = WeeklyGoal
+
+    owner = factory.SubFactory(UserFactory)
+    week_start = factory.LazyFunction(timezone.localdate)
+    target_applications = 10
+    target_followups = 5
+    target_interviews = 2

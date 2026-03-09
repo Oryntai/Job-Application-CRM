@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 
-from applications.models import ApplicationStatus
+from applications.models import ApplicationStatus, OutreachVariant
 from tests.factories import CompanyFactory, JobApplicationFactory, UserFactory
 
 pytestmark = pytest.mark.django_db
@@ -110,9 +110,46 @@ def test_analytics_endpoints_accessible():
 
     funnel = client.get("/api/v1/analytics/funnel")
     time_in_stage = client.get("/api/v1/analytics/time-in-stage")
+    weekly_goal = client.get("/api/v1/analytics/weekly-goal")
+    ab_outcomes = client.get("/api/v1/analytics/ab-outcomes")
 
     assert funnel.status_code == 200
     assert time_in_stage.status_code == 200
+    assert weekly_goal.status_code == 200
+    assert ab_outcomes.status_code == 200
+
+
+def test_weekly_goal_endpoint_updates_targets():
+    user = UserFactory()
+    client = auth_client(user)
+
+    response = client.put(
+        "/api/v1/analytics/weekly-goal",
+        {"target_applications": 7, "target_followups": 3, "target_interviews": 1},
+        format="json",
+    )
+
+    assert response.status_code == 200
+    assert response.json()["targets"]["applications"] == 7
+
+
+def test_ab_outcomes_reflects_variant_performance():
+    user = UserFactory()
+    JobApplicationFactory(
+        owner=user,
+        outreach_variant=OutreachVariant.A,
+        status=ApplicationStatus.SCREENING,
+    )
+    JobApplicationFactory(
+        owner=user,
+        outreach_variant=OutreachVariant.B,
+        status=ApplicationStatus.DRAFT,
+    )
+
+    response = auth_client(user).get("/api/v1/analytics/ab-outcomes")
+
+    assert response.status_code == 200
+    assert response.json()["winner"] == OutreachVariant.A
 
 
 def test_owner_cannot_access_other_users_nested_resources():

@@ -22,6 +22,7 @@ class JobApplicationForm(forms.ModelForm):
             "applied_date",
             "status",
             "priority",
+            "outreach_variant",
             "notes",
             "next_action_at",
             "next_action_text",

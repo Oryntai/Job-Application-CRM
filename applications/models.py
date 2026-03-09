@@ -44,6 +44,11 @@ class Currency(models.TextChoices):
     RUB = "RUB", "RUB"
 
 
+class OutreachVariant(models.TextChoices):
+    A = "A", "Template A"
+    B = "B", "Template B"
+
+
 class Tag(OwnedModel, TimeStampedModel):
     name = models.CharField(max_length=100)
 
@@ -79,6 +84,11 @@ class JobApplication(OwnedModel, TimeStampedModel):
         max_length=20, choices=ApplicationStatus.choices, default=ApplicationStatus.DRAFT
     )
     priority = models.CharField(max_length=10, choices=Priority.choices, default=Priority.MED)
+    outreach_variant = models.CharField(
+        max_length=1,
+        choices=OutreachVariant.choices,
+        default=OutreachVariant.A,
+    )
     notes = models.TextField(blank=True)
     next_action_at = models.DateTimeField(null=True, blank=True)
     next_action_text = models.CharField(max_length=255, blank=True)

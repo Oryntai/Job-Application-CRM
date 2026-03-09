@@ -4,13 +4,16 @@ import pytest
 from django.utils import timezone
 
 from analytics.selectors import (
+    get_ab_outcomes,
     get_dashboard_snapshot,
     get_funnel_stats,
+    get_goal_streak,
     get_source_stats,
     get_time_in_stage,
+    get_weekly_goal_progress,
 )
-from applications.models import ApplicationStatus, Source, StatusHistory
-from tests.factories import JobApplicationFactory, UserFactory
+from applications.models import ApplicationStatus, OutreachVariant, Source, StatusHistory
+from tests.factories import JobApplicationFactory, ReminderFactory, UserFactory, WeeklyGoalFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -106,3 +109,60 @@ def test_get_dashboard_snapshot_latest_changes_includes_history():
     snapshot = get_dashboard_snapshot(user)
 
     assert len(snapshot["latest_changes"]) == 1
+
+
+def test_get_weekly_goal_progress_uses_current_week_data():
+    user = UserFactory()
+    WeeklyGoalFactory(owner=user, target_applications=1, target_followups=1, target_interviews=0)
+    JobApplicationFactory(owner=user)
+    ReminderFactory(owner=user)
+
+    progress = get_weekly_goal_progress(user)
+
+    assert progress["actual"]["applications"] >= 1
+    assert progress["actual"]["followups"] >= 1
+
+
+def test_get_goal_streak_counts_consecutive_completed_weeks():
+    user = UserFactory()
+    current = timezone.localdate() - timedelta(days=timezone.localdate().weekday())
+    previous = current - timedelta(days=7)
+    WeeklyGoalFactory(
+        owner=user,
+        week_start=current,
+        target_applications=1,
+        target_followups=0,
+        target_interviews=0,
+    )
+    WeeklyGoalFactory(
+        owner=user,
+        week_start=previous,
+        target_applications=1,
+        target_followups=0,
+        target_interviews=0,
+    )
+    JobApplicationFactory(owner=user, applied_date=current)
+    JobApplicationFactory(owner=user, applied_date=previous)
+
+    streak = get_goal_streak(user)
+
+    assert streak == 2
+
+
+def test_get_ab_outcomes_returns_rates_and_winner():
+    user = UserFactory()
+    JobApplicationFactory(
+        owner=user,
+        outreach_variant=OutreachVariant.A,
+        status=ApplicationStatus.SCREENING,
+    )
+    JobApplicationFactory(
+        owner=user,
+        outreach_variant=OutreachVariant.B,
+        status=ApplicationStatus.DRAFT,
+    )
+
+    payload = get_ab_outcomes(user)
+
+    assert len(payload["variants"]) == 2
+    assert payload["winner"] == OutreachVariant.A

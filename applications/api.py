@@ -32,6 +32,7 @@ class JobApplicationSerializer(serializers.ModelSerializer):
             "applied_date",
             "status",
             "priority",
+            "outreach_variant",
             "notes",
             "next_action_at",
             "next_action_text",
@@ -96,7 +97,14 @@ class OwnerScopedModelViewSet(viewsets.ModelViewSet):
 
 class JobApplicationViewSet(OwnerScopedModelViewSet):
     serializer_class = JobApplicationSerializer
-    filterset_fields = ["status", "source", "location_type", "priority", "company"]
+    filterset_fields = [
+        "status",
+        "source",
+        "location_type",
+        "priority",
+        "outreach_variant",
+        "company",
+    ]
     search_fields = ["role_title", "company__name", "notes"]
     ordering_fields = ["applied_date", "next_action_at", "priority", "created_at", "updated_at"]
     queryset = JobApplication.objects.none()
