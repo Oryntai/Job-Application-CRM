@@ -1,29 +1,51 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Job Application CRM{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'app.css' %}" />
+  <script>
+    (function () {
+      var key = "jobcrm-theme";
+      var stored = localStorage.getItem(key);
+      var valid = stored === "light" || stored === "dark";
+      var fallback = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+      document.documentElement.setAttribute("data-theme", valid ? stored : fallback);
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-900 min-h-screen">
   <header class="bg-slate-900 text-white">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
       <a href="{% url 'analytics:dashboard' %}" class="font-semibold tracking-wide">Job Application CRM</a>
-      <nav class="flex gap-4 text-sm">
+      <nav class="flex items-center gap-3 text-sm">
         {% if user.is_authenticated %}
-          <a href="{% url 'analytics:dashboard' %}" class="hover:underline">Dashboard</a>
-          <a href="{% url 'applications:list' %}" class="hover:underline">Applications</a>
-          <a href="{% url 'applications:kanban' %}" class="hover:underline">Kanban</a>
-          <a href="{% url 'companies:list' %}" class="hover:underline">Companies</a>
-          <a href="{% url 'reminders:list' %}" class="hover:underline">Reminders</a>
-          <a href="{% url 'accounts:profile' %}" class="hover:underline">Profile</a>
-          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="hover:underline">Logout</button></form>
+          <a href="{% url 'analytics:dashboard' %}" class="hover:underline" data-i18n-key="Dashboard">Dashboard</a>
+          <a href="{% url 'applications:list' %}" class="hover:underline" data-i18n-key="Applications">Applications</a>
+          <a href="{% url 'applications:kanban' %}" class="hover:underline" data-i18n-key="Kanban">Kanban</a>
+          <a href="{% url 'companies:list' %}" class="hover:underline" data-i18n-key="Companies">Companies</a>
+          <a href="{% url 'reminders:list' %}" class="hover:underline" data-i18n-key="Reminders">Reminders</a>
+          <a href="{% url 'accounts:profile' %}" class="hover:underline" data-i18n-key="Profile">Profile</a>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="hover:underline" data-i18n-key="Logout">Logout</button></form>
         {% else %}
-          <a href="{% url 'login' %}" class="hover:underline">Login</a>
+          <a href="{% url 'login' %}" class="hover:underline" data-i18n-key="Login">Login</a>
+          <a href="{% url 'accounts:signup' %}" class="hover:underline" data-i18n-key="Sign up">Sign up</a>
         {% endif %}
+        <button id="theme-toggle" type="button" class="prefs-chip">
+          <span id="theme-toggle-label" data-i18n-key="Dark mode">Dark mode</span>
+        </button>
+        <label class="sr-only" for="language-switch" data-i18n-key="Language">Language</label>
+        <select id="language-switch" class="prefs-select" aria-label="Language">
+          <option value="en">ENG</option>
+          <option value="ru">RUS</option>
+        </select>
       </nav>
     </div>
   </header>
@@ -37,5 +59,6 @@
     {% endif %}
     {% block content %}{% endblock %}
   </main>
+  <script src="{% static 'preferences.js' %}"></script>
 </body>
 </html>

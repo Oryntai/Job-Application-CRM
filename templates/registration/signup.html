@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
-{% block title %}Login{% endblock %}
+{% block title %}Sign up{% endblock %}
 {% block content %}
 <div class="max-w-md mx-auto bg-white shadow rounded p-6">
-  <h1 class="text-xl font-semibold mb-4">Login</h1>
+  <h1 class="text-xl font-semibold mb-4">Create account</h1>
   <form method="post" class="space-y-4">
     {% csrf_token %}
     {% if form.non_field_errors %}
@@ -19,6 +19,7 @@
         id="id_username"
         name="username"
         type="text"
+        value="{{ form.username.value|default:'' }}"
         autocomplete="username"
         required
         class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
@@ -29,26 +30,37 @@
     </div>
 
     <div>
-      <label for="id_password" class="mb-1 block text-sm font-medium text-slate-700">Password</label>
+      <label for="id_password1" class="mb-1 block text-sm font-medium text-slate-700">Password</label>
       <input
-        id="id_password"
-        name="password"
+        id="id_password1"
+        name="password1"
         type="password"
-        autocomplete="current-password"
+        autocomplete="new-password"
         required
         class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
       />
-      {% if form.password.errors %}
-        <p class="mt-1 text-sm text-rose-600">{{ form.password.errors.0 }}</p>
+      {% if form.password1.errors %}
+        <p class="mt-1 text-sm text-rose-600">{{ form.password1.errors.0 }}</p>
       {% endif %}
     </div>
 
-    {% if next %}
-      <input type="hidden" name="next" value="{{ next }}" />
-    {% endif %}
+    <div>
+      <label for="id_password2" class="mb-1 block text-sm font-medium text-slate-700">Confirm password</label>
+      <input
+        id="id_password2"
+        name="password2"
+        type="password"
+        autocomplete="new-password"
+        required
+        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+      />
+      {% if form.password2.errors %}
+        <p class="mt-1 text-sm text-rose-600">{{ form.password2.errors.0 }}</p>
+      {% endif %}
+    </div>
 
-    <button class="px-4 py-2 bg-slate-900 text-white rounded" type="submit">Sign in</button>
+    <button class="px-4 py-2 bg-slate-900 text-white rounded" type="submit">Create account</button>
   </form>
-  <p class="mt-4 text-sm text-slate-600">No account yet? <a href="{% url 'accounts:signup' %}" class="font-medium text-slate-900 hover:underline">Create one</a></p>
+  <p class="mt-4 text-sm text-slate-600">Already have an account? <a href="{% url 'login' %}" class="font-medium text-slate-900 hover:underline">Sign in</a></p>
 </div>
 {% endblock %}
